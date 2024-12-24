@@ -11,10 +11,15 @@ public class Main {
         Canal canal1 = new Canal(afficheur1);
         Canal canal2 = new Canal(afficheur2);
 
-        Capteur capteur = new CapteurImpl();
-        capteur.attach(canal1);
-        capteur.attach(canal2);
+        // Capteur capteur = new CapteurImpl();
+        List<ObserverDeCapteurAsync> canaux = new ArrayList<>();
+        canaux.add(new Canal(afficheur1));
+        canaux.add(new Canal(afficheur2));
 
+        Capteur capteur = new CapteurImpl();
+        for (ObserverDeCapteurAsync c : canaux) {
+            capteur.attach(c);
+        }
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 
         Runnable task = capteur::tick;
@@ -26,5 +31,6 @@ public class Main {
             canal1.shutdown();
             canal2.shutdown();
         }));
+
     }
 }
