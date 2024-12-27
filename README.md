@@ -30,27 +30,49 @@ Un **oracle** dans ce projet fait référence à un mécanisme permettant de vé
 Dans notre cas, un oracle pourrait être :
 - **Une vérification lisible par un humain** : Simplement imprimer les valeurs reçues par chaque observateur (`Canal` et `Afficheur`), et vérifier manuellement si les valeurs attendues correspondent aux valeurs imprimées.
 
-#### Exemple d'Oracle :
-Par exemple, si un observateur est censé récupérer la valeur mise à jour du capteur après un "tick", l'oracle pourrait garantir que la valeur retournée par l'observateur est cohérente avec la valeur du capteur à ce moment-là.
+## Diagrammes UML
+
+### Diagramme de Classes
+![Diagramme de Classes](./path_to_your_image/Class_Diagram.png)
+
+### Diagramme de Séquence
+![Diagramme de Séquence](./path_to_your_image/Sequence_Diagram.png)
+
+## Tests
+
+Une suite de tests unitaires a été mise en place pour vérifier la robustesse et la cohérence du système. Les tests utilisent JUnit et Mockito, et couvrent plusieurs scénarios pour valider le comportement du système.
+
+### Scénarios Testés
+
+1. **Attach Observer**  
+   Vérifie que les observateurs sont correctement attachés au capteur et qu'une exception est levée si un observateur est déjà attaché.
+
+2. **Tick et Notification des Observateurs**  
+   Simule une mise à jour du capteur (`tick`) et vérifie que tous les observateurs sont notifiés correctement.
+
+3. **Mise à Jour Asynchrone**  
+   Teste la fonctionnalité de mise à jour asynchrone des observateurs.
+
+4. **Fermeture (Shutdown)**  
+   Vérifie que les ressources liées aux observateurs (par exemple, les exécuteurs planifiés) sont correctement libérées après fermeture.
+
+5. **Attach Multiple Observers**  
+   Teste le comportement lorsque plusieurs observateurs sont attachés au capteur.
+
+6. **Shutdown Global**  
+   Simule l'arrêt complet de l'application et vérifie que tous les composants sont correctement arrêtés.
+
+### Exemple de Code de Test
 
 ```java
-public class Afficheur implements ObserverDeCapteur {
-    private final String name;
-    private final Canal canal;
-
-    public Afficheur(String name, Canal canal) {
-        this.name = name;
-        this.canal = canal;
-    }
-
-    @Override
-    public void update() {
-        Integer value = canal.get();
-        if (value != null) {
-            System.out.println(name + " a reçu la valeur : " + value);
-            // Oracle check : La valeur imprimée doit correspondre à la valeur mise à jour du capteur.
-        }
-    }
+@Test
+public void testAttachObserver() throws NoSuchFieldException, IllegalAccessException {
+    capteur.attach(canal1);
+    
+    Field observersField = CapteurImpl.class.getDeclaredField("observers");
+    observersField.setAccessible(true);
+    @SuppressWarnings("unchecked")
+    List<Canal> observers = (List<Canal>) observersField.get(capteur);
+    
+    assertEquals(1, observers.size(), "Observer should be attached");
 }
-```
-L'oracle ici consisterait à vérifier que les valeurs imprimées par Afficheur correspondent aux valeurs attendues, basées sur les données du Capteur.
